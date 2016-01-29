@@ -14,7 +14,7 @@
  		nell'ear --> extEarLib
  		nel war in compilazione --> extWarLib
  		nel war provided --> extWarLibP
- 		nel ejb in compilazione --> extEjbLib
+ 		nel ejb in compilazione vanno nell'ear
  		nel ejb provided --> extEjbLibP
  		
  		
@@ -84,11 +84,23 @@ subprojects{
 //setup dell'ear
 
 
-
-
-
 project(':ContEar'){
-
+	//modalità backend viene eseguito il deploy anche dell'ejb.
+	//modalità frontend viene eseguito il deploy delle sole interfacce Remote
+	def earMode = 'backend'
+		
+	//progetti ejb contenuti nell'ear con gli ejb di interfacce remote usate per chiamarlo
+	def ejbProjects = [':ContEjb':[':ContEjbRemote']]
+	
+	//progetti war con gli ejb da usare nel progetto
+	//verranno caricate nel war le sole interfacce remote
+	def warProjects = [':ContWeb':[':ContEjbRemote']]
+			
+	ejbProjects.each{
+		project(it.key).ext.set('remoteCallEjb',it.value)
+	}
+	
+	
 
 	task undeployEarToJboss <<{
 	 delete ("${jbossDirectory}/standalone/deployments/${project.name}.ear")
@@ -132,14 +144,33 @@ project(':ContEar'){
 		
 		
 		
+		
+		
 		//inserire qui i progetti contenuti	nell'ear
 		
 		//progetti war
-	    deploy project(path: ':ContWeb', configuration: 'archives')
+		
+		warProjects.each{war->
+			project(war.key).ext.set('ejbToCall',warProjects.get(war.key));
+			deploy project(path: war.key, configuration: 'archives')
+		}
 	    
-	    //progetti ejb
-	    deploy project(':ContEjb')
-	  	deploy project(':ContEjbRemote')
+	    
+	    //progetti ejb. Ogni progetto ejb si porta dietro l'ejb delle interfacce remote.
+	    
+	    ejbProjects.each{ejb->
+	    	//l'ejb si distribuisce solo in backend
+	    	if (!(earMode=="frontend")){
+	    		deploy project(ejb.key)
+	    	}
+	    	
+	    	//controllo se ci sono eventuali chiamate remote da implementare
+	    	//per quell'ejb e carico l'ejb remoto nell'ear
+	    	ejb.value.each{
+	    		deploy project(it)
+	    	}
+	    }
+	  
 	}	
 		
 	ear {
@@ -213,28 +244,17 @@ project(':ContWeb'){
 		
 		//carico i jar che non vanno distribuiti col war
 		providedCompile fileTree(dir: "${project.rootDir}/extWarLibP", includes: ['**/*.jar']) 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+				
 		//inserire qui i progetti ejb che il war deve usare ma che sono presenti nell'ear
-	//	providedCompile (project(':ContEjb'))
+	
+		//di norma le interfacce remote vanno nell'ear che contiene il war
+				
+		project.ext.ejbToCall.each{
+		remoteInterface->
+			providedCompile(project (remoteInterface))
+		}
 		
-		//inserire qui i progetti ejb che vanno distribuiti col war
 		
-		//di norma le interfacce remote vanno distribuite col war
-		compile(project (':ContEjbRemote'))
-		
-		//compile (project(':')
 		
 	
 	}
@@ -256,6 +276,7 @@ project(':ContWeb'){
 //ejb. Inserire i deploy anche nell'ear
 
 project(':ContEjb'){
+
 	apply plugin:"war"
 	//librerie presenti nell'ear
 	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
@@ -268,17 +289,8 @@ project(':ContEjb'){
 	def ejbLib = new File("${project.rootDir}/ejb.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
 	//librerie ejb specifiche del progetto
 	def ejbLibP = new File("${project.rootDir}/${project.name}_ejb.txt").exists()?new File("${project.rootDir}/${project.name}_ejb.txt") as String[]:[]
-	
-	repositories {
-	   	flatDir {
-	       dirs 'libs'
-	   	}
-	}
-	
-	
+		
 	dependencies {
-		
-		
 		//librerie dell'ear
 		earLib.each{	
 			providedCompile it;
@@ -292,20 +304,20 @@ project(':ContEjb'){
 		jbossEjbLib.each{
 			providedCompile it;
 		}
-		
-		//carico i jar che vanno distribuiti col ejb	
-		compile fileTree(dir: "${project.rootDir}/extEjbLib", includes: ['**/*.jar']) 
+	
 		
 		//carico i jar che non vanno distribuiti col ejb
 		providedCompile fileTree(dir: "${project.rootDir}/extEjbLibP", includes: ['**/*.jar']) 
+		 
+		 //interfacce remote che vanno nell'ear automaticamente
+		project.remoteCallEjb.each{			
+			providedCompile project(path:it) 
+		}
 		
-		providedCompile project(path: ':ContEjbRemote') //interfacce remote
-		
-		//inserire qui le dipendenze da altri ejb
-		//providedCompile se presenti nell'ear
-		//compile se vanno distribuiti col pacchetto
-	
+
 	}
+	
+	
 	
 }
 
