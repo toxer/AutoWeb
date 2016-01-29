@@ -1,0 +1,6 @@
+<window title="Exemple" apply="it.infocamere.mainwindow.MainWindowController">
+	<panel id="panel">
+
+	</panel>
+
+</window>
