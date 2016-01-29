@@ -21,8 +21,46 @@
 */
 import groovy.io.FileType
 
+//direcotory locale del jboss
+def jbossDirectory="/opt/server/contabilita/jboss-eap-6.4"
 
 allprojects {
+	//task per comandare il jboss
+
+task restartJboss(type:Exec) {
+  workingDir "${jbossDirectory}/bin"
+
+  
+  commandLine './jboss-cli.sh --connect --command=:reload'
+
+
+  ext.output = {
+    return standardOutput.toString()
+  }
+}
+
+task shutdownJboss(type:Exec) {
+  workingDir "${jbossDirectory}/bin"  
+  executable "sh" 
+  args "-c", './jboss-cli.sh --connect --command=:shutdown'
+
+
+  ext.output = {
+    return standardOutput.toString()
+  }
+}
+
+
+
+
+task startJboss(type:Exec) {
+  workingDir "${jbossDirectory}/bin"
+  executable "sh"
+  args "-c", "./standalone.sh -b 0.0.0.0 "
+  ext.output = {
+    return standardOutput.toString()
+  }
+}
 	
    
 }
@@ -46,7 +84,38 @@ subprojects{
 //setup dell'ear
 
 
+
+
+
 project(':ContEar'){
+
+
+	task undeployEarToJboss <<{
+	 delete ("${jbossDirectory}/standalone/deployments/${project.name}.ear")
+     delete ("${jbossDirectory}/standalone/deployments/${project.name}.ear.undeployed")
+   	
+   }
+
+	task deployEarToJboss <<{
+	 copy {
+      from ("${project.buildDir}/libs"){
+      	 include '**/*.ear'
+      }
+      into "${jbossDirectory}/standalone/deployments/"
+     	
+   }
+   }
+   task assbembleAndDeployJboss(dependsOn: [clean,assemble,deployEarToJboss])<<{
+	println("COMPLETED");	
+	}
+	
+	assemble.mustRunAfter clean
+	deployEarToJboss.mustRunAfter assemble
+
+	
+   
+
+
 	apply plugin:"ear"	
 	
 	//caricamento librerie da mettere nell'ear
@@ -68,9 +137,9 @@ project(':ContEar'){
 		//progetti war
 	    deploy project(path: ':ContWeb', configuration: 'archives')
 	    
-	    //porogetti ejb
-	    deploy project(path: ':ContEjb')
-	      
+	    //progetti ejb
+	    deploy project(':ContEjb')
+	  	deploy project(':ContEjbRemote')
 	}	
 		
 	ear {
@@ -87,7 +156,7 @@ project(':ContEar'){
 	        description = "Ear di test"	    
 	          	
 	      	//context per i moduli war
-	      	webModule("${project(':ContWeb').name}.war", "${project(':ContWeb').name}")
+	      	webModule("ContWeb.war", "Test")
 	        
 	    }
 	}
@@ -98,8 +167,8 @@ project(':ContEar'){
 //e inserire i parametri di deploy del war nell'EAR
 
 project(':ContWeb'){
-	
 	apply plugin:"war"
+	project.webAppDirName="WebContent"
 	version = ''
 	//librerie presenti nell'ear
 	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
@@ -158,9 +227,12 @@ project(':ContWeb'){
 		
 		
 		//inserire qui i progetti ejb che il war deve usare ma che sono presenti nell'ear
-		providedCompile (project(':ContEjb'))
+	//	providedCompile (project(':ContEjb'))
 		
 		//inserire qui i progetti ejb che vanno distribuiti col war
+		
+		//di norma le interfacce remote vanno distribuite col war
+		compile(project (':ContEjbRemote'))
 		
 		//compile (project(':')
 		
@@ -184,6 +256,62 @@ project(':ContWeb'){
 //ejb. Inserire i deploy anche nell'ear
 
 project(':ContEjb'){
+	apply plugin:"war"
+	//librerie presenti nell'ear
+	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	//librerie comuni del jboss
+	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	//librerie del jboss per i war
+	def jbossEjbLib = new File("${project.rootDir}/jboss_ejb.txt").exists()?new File("${project.rootDir}/jboss_ejb.txt") as String[]:[]
+	
+	//librerie comuni agli ejb
+	def ejbLib = new File("${project.rootDir}/ejb.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	//librerie ejb specifiche del progetto
+	def ejbLibP = new File("${project.rootDir}/${project.name}_ejb.txt").exists()?new File("${project.rootDir}/${project.name}_ejb.txt") as String[]:[]
+	
+	repositories {
+	   	flatDir {
+	       dirs 'libs'
+	   	}
+	}
+	
+	
+	dependencies {
+		
+		
+		//librerie dell'ear
+		earLib.each{	
+			providedCompile it;
+		}
+	
+		//carico le librerie comuni del jboss
+		jbossCommonLib.each{	
+			providedCompile it;
+		}
+		//carico le librerie comuni del jboss per gli ejb
+		jbossEjbLib.each{
+			providedCompile it;
+		}
+		
+		//carico i jar che vanno distribuiti col ejb	
+		compile fileTree(dir: "${project.rootDir}/extEjbLib", includes: ['**/*.jar']) 
+		
+		//carico i jar che non vanno distribuiti col ejb
+		providedCompile fileTree(dir: "${project.rootDir}/extEjbLibP", includes: ['**/*.jar']) 
+		
+		providedCompile project(path: ':ContEjbRemote') //interfacce remote
+		
+		//inserire qui le dipendenze da altri ejb
+		//providedCompile se presenti nell'ear
+		//compile se vanno distribuiti col pacchetto
+	
+	}
+	
+}
+
+
+
+project(':ContEjbRemote'){
 	apply plugin:"war"
 	//librerie presenti nell'ear
 	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
@@ -222,6 +350,7 @@ project(':ContEjb'){
 		providedCompile fileTree(dir: "${project.rootDir}/extEjbLibP", includes: ['**/*.jar']) 
 		
 		
+		
 		//inserire qui le dipendenze da altri ejb
 		//providedCompile se presenti nell'ear
 		//compile se vanno distribuiti col pacchetto
@@ -229,3 +358,4 @@ project(':ContEjb'){
 	}
 	
 }
+
