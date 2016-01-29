@@ -1,0 +1,4 @@
+<panelchildren apply="it.infocamere.panel.PanelController">
+<label>Simple ejb call</label>
+<label id="result"></label>
+</panelchildren>
