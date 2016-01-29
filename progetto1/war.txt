@@ -1,0 +1,4 @@
+org.zkoss.zk:zul:8.0.1
+org.zkoss.zk:zk:8.0.1
+org.zkoss.zk:zhtml:8.0.1
+org.zkoss.zk:zkbind:8.0.1

@@ -1,0 +1,231 @@
+//le librerie vanno in formato gradle
+
+/* librerie da mettere nell'ear puntate dai progetti --> earLib.txt
+ 	librerie da deployare con i progetti --> 
+ 		se comuni a tutti i progetti di quel tipo [tipo_progetto].txt (war.txt) 
+ 		se particolari [nome_progetto]_[tipo_progetto].txt (contWeb_war.txt)
+ 	librerie del servlet container
+ 		comuni per tutti --> jboss.txt
+ 		solo per i war --> jboss_war.txt
+ 		solo per ejb --> jboss_ejb.txt
+ 		
+ 		
+ 	jar da aggiungere
+ 		nell'ear --> extEarLib
+ 		nel war in compilazione --> extWarLib
+ 		nel war provided --> extWarLibP
+ 		nel ejb in compilazione --> extEjbLib
+ 		nel ejb provided --> extEjbLibP
+ 		
+ 		
+*/
+import groovy.io.FileType
+
+
+allprojects {
+	
+   
+}
+
+subprojects{
+	apply plugin:"java"
+	repositories {
+		mavenCentral()
+		maven{
+    		//zkoss maven repo    	
+  			url 'https://repository.jboss.org/nexus/content/groups/public/'
+    	}
+        maven{
+    		//jboss maven repo
+    		url  "http://mavensync.zkoss.org/maven2"
+  		}
+  	}
+}
+
+
+//setup dell'ear
+
+
+project(':ContEar'){
+	apply plugin:"ear"	
+	
+	//caricamento librerie da mettere nell'ear
+	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	
+	dependencies {
+		//qui carico tutte le librerie definite nel file lib.properties 
+		earLib.each{	
+			earlib it;
+		}
+			    
+	    //carico i jar che vanno inseriti nell'ear
+		earlib fileTree(dir: "${project.rootDir}/extEarLib", includes: ['**/*.jar'])
+		
+		
+		
+		//inserire qui i progetti contenuti	nell'ear
+		
+		//progetti war
+	    deploy project(path: ':ContWeb', configuration: 'archives')
+	    
+	    //porogetti ejb
+	    deploy project(path: ':ContEjb')
+	      
+	}	
+		
+	ear {
+	    appDirName 'src/main/app'  // use application metadata found in this folder
+	    // put dependent libraries into APP-INF/lib inside the generated EAR
+	    libDirName 'APP-INF/lib' 
+	   
+	   
+	    deploymentDescriptor {  
+	
+	        applicationName = "Test"
+	        initializeInOrder = true
+	        displayName = 	    
+	        description = "Ear di test"	    
+	          	
+	      	//context per i moduli war
+	      	webModule("${project(':ContWeb').name}.war", "${project(':ContWeb').name}")
+	        
+	    }
+	}
+			
+}
+
+//setup del war. Copiare il template per ogni nuovo war
+//e inserire i parametri di deploy del war nell'EAR
+
+project(':ContWeb'){
+	
+	apply plugin:"war"
+	version = ''
+	//librerie presenti nell'ear
+	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	//librerie comuni ai war
+	def warLib = new File("${project.rootDir}/war.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	//librerie war specifiche del progetto
+	def warLibP = new File("${project.rootDir}/${project.name}_war.txt").exists()?new File("${project.rootDir}/${project.name}_war.txt") as String[]:[]
+	//librerie comuni del jboss
+	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	//librerie del jboss per i war
+	def jbossWarLib = new File("${project.rootDir}/jboss_war.txt").exists()?new File("${project.rootDir}/jboss_war.txt") as String[]:[]
+	// librerie tipiche del progetto
+	
+	
+	
+		
+	dependencies {
+		//carico tutte le librerie dell'ear
+		//queste non vanno inserite nel war ma sono già presenti nell'ear
+		earLib.each{	
+			providedCompile it;
+		}
+					
+		//librerie da inserire in WEB-INF/lib 
+		warLib.each{	
+			compile it;
+		}
+		warLibP.each{	
+			compile it;
+		}
+		//carico le librerie comuni del jboss
+		jbossCommonLib.each{	
+			providedCompile it;
+		}
+		//carico le librerie comuni del jboss per i war
+		jbossWarLib.each{	
+			providedCompile it;
+		}
+		
+		//carico i jar che vanno distribuiti col war	
+		compile fileTree(dir: "${project.rootDir}/extWarLib", includes: ['**/*.jar']) 
+		
+		//carico i jar che non vanno distribuiti col war
+		providedCompile fileTree(dir: "${project.rootDir}/extWarLibP", includes: ['**/*.jar']) 
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//inserire qui i progetti ejb che il war deve usare ma che sono presenti nell'ear
+		providedCompile (project(':ContEjb'))
+		
+		//inserire qui i progetti ejb che vanno distribuiti col war
+		
+		//compile (project(':')
+		
+	
+	}
+	
+			
+	war {
+		baseName="${project.name}"
+   	// from 'src/main/webapp' // adds a file-set to the root of the archive
+	    webInf { from 'src/main/pagesUnderWebinf' } // adds a file-set to the WEB-INF dir.
+	    classpath fileTree('${project.rootProject}/additionalLibs') // adds a file-set to the WEB-INF/lib dir.
+	    webXml = file('src/web.xml') // copies a file to WEB-INF/web.xml
+   
+	}	
+		
+	
+}
+
+
+//ejb. Inserire i deploy anche nell'ear
+
+project(':ContEjb'){
+	apply plugin:"war"
+	//librerie presenti nell'ear
+	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	//librerie comuni del jboss
+	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	//librerie del jboss per i war
+	def jbossEjbLib = new File("${project.rootDir}/jboss_ejb.txt").exists()?new File("${project.rootDir}/jboss_ejb.txt") as String[]:[]
+	
+	//librerie comuni agli ejb
+	def ejbLib = new File("${project.rootDir}/ejb.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	//librerie ejb specifiche del progetto
+	def ejbLibP = new File("${project.rootDir}/${project.name}_ejb.txt").exists()?new File("${project.rootDir}/${project.name}_ejb.txt") as String[]:[]
+	
+	
+	dependencies {
+		
+		
+		//librerie dell'ear
+		earLib.each{	
+			providedCompile it;
+		}
+	
+		//carico le librerie comuni del jboss
+		jbossCommonLib.each{	
+			providedCompile it;
+		}
+		//carico le librerie comuni del jboss per gli ejb
+		jbossEjbLib.each{
+			providedCompile it;
+		}
+		
+		//carico i jar che vanno distribuiti col ejb	
+		compile fileTree(dir: "${project.rootDir}/extEjbLib", includes: ['**/*.jar']) 
+		
+		//carico i jar che non vanno distribuiti col ejb
+		providedCompile fileTree(dir: "${project.rootDir}/extEjbLibP", includes: ['**/*.jar']) 
+		
+		
+		//inserire qui le dipendenze da altri ejb
+		//providedCompile se presenti nell'ear
+		//compile se vanno distribuiti col pacchetto
+	
+	}
+	
+}

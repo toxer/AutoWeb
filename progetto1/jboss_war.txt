@@ -1,0 +1,2 @@
+javax.faces:jsf-api:2.1
+javax.faces:jsf-impl:1.2_15
