@@ -53,6 +53,15 @@ task shutdownJboss(type:Exec) {
 
 
 
+task startJbossDebugMode(type:Exec) {
+  workingDir "${jbossDirectory}/bin"
+  executable "sh"
+  args "-c", "./standalone.sh --debug 9797 "
+  ext.output = {
+    return standardOutput.toString()
+  }
+}
+
 task startJboss(type:Exec) {
   workingDir "${jbossDirectory}/bin"
   executable "sh"
@@ -61,7 +70,8 @@ task startJboss(type:Exec) {
     return standardOutput.toString()
   }
 }
-	
+		
+   
    
 }
 
@@ -76,6 +86,10 @@ subprojects{
         maven{
     		//jboss maven repo
     		url  "http://mavensync.zkoss.org/maven2"
+  		}
+  		maven{
+    		//restlet
+    		url  "http://maven.restlet.org"
   		}
   	}
 }
@@ -94,7 +108,7 @@ project(':ContEar'){
 	
 	//progetti war con gli ejb da usare nel progetto
 	//verranno caricate nel war le sole interfacce remote
-	def warProjects = [':ContWeb':[':ContEjbRemote']]
+	def warProjects = [':ContWeb':[':ContEjbRemote'],':ContService':[]]
 			
 	ejbProjects.each{
 		project(it.key).ext.set('remoteCallEjb',it.value)
@@ -131,7 +145,7 @@ project(':ContEar'){
 	apply plugin:"ear"	
 	
 	//caricamento librerie da mettere nell'ear
-	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	def earLib = readCongigFile("${project.rootDir}/earLib.txt");
 	
 	dependencies {
 		//qui carico tutte le librerie definite nel file lib.properties 
@@ -188,6 +202,7 @@ project(':ContEar'){
 	          	
 	      	//context per i moduli war
 	      	webModule("ContWeb.war", "Test")
+	      	webModule("ContService.war", "servizio")
 	        
 	    }
 	}
@@ -202,15 +217,15 @@ project(':ContWeb'){
 	project.webAppDirName="WebContent"
 	version = ''
 	//librerie presenti nell'ear
-	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	def earLib =readCongigFile("${project.rootDir}/earLib.txt");
 	//librerie comuni ai war
-	def warLib = new File("${project.rootDir}/war.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	def warLib = readCongigFile("${project.rootDir}/war.txt");
 	//librerie war specifiche del progetto
-	def warLibP = new File("${project.rootDir}/${project.name}_war.txt").exists()?new File("${project.rootDir}/${project.name}_war.txt") as String[]:[]
+	def warLibP = readCongigFile("${project.rootDir}/${project.name}_war.txt");
 	//librerie comuni del jboss
-	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	def jbossCommonLib = readCongigFile("${project.rootDir}/jboss.txt");
 	//librerie del jboss per i war
-	def jbossWarLib = new File("${project.rootDir}/jboss_war.txt").exists()?new File("${project.rootDir}/jboss_war.txt") as String[]:[]
+	def jbossWarLib =readCongigFile("${project.rootDir}/jboss_war.txt");
 	// librerie tipiche del progetto
 	
 	
@@ -248,10 +263,13 @@ project(':ContWeb'){
 		//inserire qui i progetti ejb che il war deve usare ma che sono presenti nell'ear
 	
 		//di norma le interfacce remote vanno nell'ear che contiene il war
-				
-		project.ext.ejbToCall.each{
-		remoteInterface->
-			providedCompile(project (remoteInterface))
+						
+			
+		if (project.getProperties().get('ejbToCall') != null){
+			project.ext.ejbToCall.each{
+			remoteInterface->
+				providedCompile(project (remoteInterface))
+			}
 		}
 		
 		
@@ -259,13 +277,16 @@ project(':ContWeb'){
 	
 	}
 	
-			
+	println(	"${project.projectDir}/src/web.xml")
 	war {
 		baseName="${project.name}"
    	// from 'src/main/webapp' // adds a file-set to the root of the archive
 	    webInf { from 'src/main/pagesUnderWebinf' } // adds a file-set to the WEB-INF dir.
 	    classpath fileTree('${project.rootProject}/additionalLibs') // adds a file-set to the WEB-INF/lib dir.
-	    webXml = file('src/web.xml') // copies a file to WEB-INF/web.xml
+	  
+	    if (new File("${project.projectDir}/src/web.xml").exists()){
+	    	webXml = file("${project.projectDir}/src/web.xml") // copies a file to WEB-INF/web.xml
+	    }
    
 	}	
 		
@@ -273,22 +294,105 @@ project(':ContWeb'){
 }
 
 
+
+//setup del war. Copiare il template per ogni nuovo war
+//e inserire i parametri di deploy del war nell'EAR
+
+project(':ContService'){
+	apply plugin:"war"
+	project.webAppDirName="WebContent"
+	version = ''
+	//librerie presenti nell'ear
+	def earLib = readCongigFile("${project.rootDir}/earLib.txt");
+	//librerie comuni ai war
+	def warLib = readCongigFile("${project.rootDir}/war.txt");
+	//librerie war specifiche del progetto
+	def warLibP =readCongigFile("${project.rootDir}/${project.name}_war.txt");
+	//librerie comuni del jboss
+	def jbossCommonLib = readCongigFile("${project.rootDir}/jboss.txt");
+	//librerie del jboss per i war
+	def jbossWarLib = readCongigFile("${project.rootDir}/jboss_war.txt");
+	// librerie tipiche del progetto
+	
+	
+	
+		
+	dependencies {
+		//carico tutte le librerie dell'ear
+		//queste non vanno inserite nel war ma sono già presenti nell'ear
+		earLib.each{	
+			providedCompile it;
+		}
+					
+		//librerie da inserire in WEB-INF/lib 
+		warLib.each{	
+			compile it;
+		}
+		warLibP.each{	
+			compile it;
+		}
+		//carico le librerie comuni del jboss
+		jbossCommonLib.each{	
+			providedCompile it;
+		}
+		//carico le librerie comuni del jboss per i war
+		jbossWarLib.each{	
+			providedCompile it;
+		}
+		
+		//carico i jar che vanno distribuiti col war	
+		compile fileTree(dir: "${project.rootDir}/extWarLib", includes: ['**/*.jar']) 
+		
+		//carico i jar che non vanno distribuiti col war
+		providedCompile fileTree(dir: "${project.rootDir}/extWarLibP", includes: ['**/*.jar']) 
+				
+		//inserire qui i progetti ejb che il war deve usare ma che sono presenti nell'ear
+	
+		//di norma le interfacce remote vanno nell'ear che contiene il war
+			
+				
+		if (project.getProperties().get('ejbToCall') != null){
+			project.ext.ejbToCall.each{
+			remoteInterface->
+				providedCompile(project (remoteInterface))
+			}
+		}
+		
+		
+		
+	
+	}
+	
+	war {
+		baseName="${project.name}"
+   	// from 'src/main/webapp' // adds a file-set to the root of the archive
+	    webInf { from 'src/main/pagesUnderWebinf' } // adds a file-set to the WEB-INF dir.
+	    classpath fileTree('${project.rootProject}/additionalLibs') // adds a file-set to the WEB-INF/lib dir.
+		
+		if (new File("${project.projectDir}/src/web.xml").exists()){
+	    	webXml = file("${project.projectDir}/src/web.xml") // copies a file to WEB-INF/web.xml
+	    }   
+	}	
+		
+	
+}
+
 //ejb. Inserire i deploy anche nell'ear
 
 project(':ContEjb'){
 
 	apply plugin:"war"
 	//librerie presenti nell'ear
-	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	def earLib = readCongigFile("${project.rootDir}/earLib.txt");
 	//librerie comuni del jboss
-	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	def jbossCommonLib = readCongigFile("${project.rootDir}/jboss.txt");
 	//librerie del jboss per i war
-	def jbossEjbLib = new File("${project.rootDir}/jboss_ejb.txt").exists()?new File("${project.rootDir}/jboss_ejb.txt") as String[]:[]
+	def jbossEjbLib = readCongigFile("${project.rootDir}/jboss_ejb.txt");
 	
 	//librerie comuni agli ejb
-	def ejbLib = new File("${project.rootDir}/ejb.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	def ejbLib = readCongigFile("${project.rootDir}/ejb.txt");
 	//librerie ejb specifiche del progetto
-	def ejbLibP = new File("${project.rootDir}/${project.name}_ejb.txt").exists()?new File("${project.rootDir}/${project.name}_ejb.txt") as String[]:[]
+	def ejbLibP = readCongigFile("${project.rootDir}/${project.name}_ejb.txt");
 		
 	dependencies {
 		//librerie dell'ear
@@ -326,16 +430,17 @@ project(':ContEjb'){
 project(':ContEjbRemote'){
 	apply plugin:"war"
 	//librerie presenti nell'ear
-	def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	//def earLib = new File("${project.rootDir}/earLib.txt").exists()?new File("${project.rootDir}/earLib.txt") as String[]:[]
+	def earLib = readCongigFile("${project.rootDir}/earLib.txt");
 	//librerie comuni del jboss
-	def jbossCommonLib = new File("${project.rootDir}/jboss.txt").exists()?new File("${project.rootDir}/jboss.txt") as String[]:[]
+	def jbossCommonLib =readCongigFile("${project.rootDir}/jboss.txt");
 	//librerie del jboss per i war
-	def jbossEjbLib = new File("${project.rootDir}/jboss_ejb.txt").exists()?new File("${project.rootDir}/jboss_ejb.txt") as String[]:[]
+	def jbossEjbLib = readCongigFile("${project.rootDir}/jboss_ejb.txt");
 	
 	//librerie comuni agli ejb
-	def ejbLib = new File("${project.rootDir}/ejb.txt").exists()?new File("${project.rootDir}/war.txt") as String[]:[]
+	def ejbLib = readCongigFile("${project.rootDir}/ejb.txt");
 	//librerie ejb specifiche del progetto
-	def ejbLibP = new File("${project.rootDir}/${project.name}_ejb.txt").exists()?new File("${project.rootDir}/${project.name}_ejb.txt") as String[]:[]
+	def ejbLibP = readCongigFile("${project.rootDir}/${project.name}_ejb.txt");
 	
 	
 	dependencies {
@@ -371,3 +476,18 @@ project(':ContEjbRemote'){
 	
 }
 
+ String[] readCongigFile(String fileName){
+	File f =new File (fileName);
+	if (!f.exists()){
+		return [];
+	}
+	String[] str = f as String[]
+	List s =[]
+	str.each{
+		if (!it != null && !it.trim().isEmpty() && !it.startsWith("#")){
+			s.add(it)
+		}
+	}
+	
+	return s;
+}

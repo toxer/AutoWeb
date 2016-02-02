@@ -1,1 +1,1 @@
-include ':ContEar',':ContEjb',':ContEjbRemote',':ContWeb'
+include ':ContEar',':ContEjb',':ContEjbRemote',':ContWeb',':ContService'
