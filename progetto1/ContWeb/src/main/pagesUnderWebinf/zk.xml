@@ -1,0 +1,60 @@
+<zk>
+
+	<!-- Eccezioni standard -->
+	<!-- <error-page> -->
+	<!-- <exception-type>it.infocamere.spri.web.exception.StandardWebRuntimeException -->
+	<!-- </exception-type> -->
+	<!-- <location>/WEB-INF/pages/exceptions/StandardWebRuntimeException.zul -->
+	<!-- </location> -->
+	<!-- </error-page> -->
+
+	<!-- Eccezioni senza messaggio utente -->
+	<!-- <error-page> <exception-type>it.infocamere.helios.exception.MinimalException 
+		</exception-type> <location>/WEB-INF/pages/helios/exception/NoExceptionWindow.zul 
+		</location> </error-page> -->
+
+	<!-- eccezioni non trappate -->
+	<!-- <error-page> <exception-type>java.lang.Exception </exception-type> 
+		<location>/WEB-INF/pages/helios/exception/NoTrappedExceptionWindow.zul </location> 
+		</error-page> -->
+
+
+
+	<!--monitor -->
+	<!-- <listener> <description>Monitor the statistic</description> <listener-class>org.zkoss.zk.ui.util.Statistic</listener-class> 
+		</listener> <listener> <description>ZK performance monitor</description> 
+		<listener-class>org.zkoss.zkdemo.monitor.PerformanceMeter </listener-class> 
+		</listener> -->
+	<!-- <listener> <description>ZK AuInfoInterceptor</description> <listener-class>org.zkoss.poc.gazer.ctrl.AuInfoInterceptor</listener-class> 
+		</listener> -->
+	<!-- end monitor -->
+
+	<desktop-config>
+		<theme-uri>/bootstrap/css/bootstrap.min.css</theme-uri>
+		<theme-uri>/bootstrap/css/bootstrap-theme.min.css</theme-uri>
+	
+
+	</desktop-config>
+	<!-- getstore delle eccezioni -->
+
+	<!-- max upload size -->
+	<system-config>
+		<max-upload-size>50000</max-upload-size>
+	</system-config>
+	<!-- Language settings. -->
+<!-- 	<library-property> -->
+<!-- 		<name>org.zkoss.web.preferred.locale</name> -->
+<!-- 		<value>it</value> -->
+<!-- 	</library-property> -->
+	<!-- Turn on the following if you want to use the trendy mold as default 
+		for all buttons. -->
+	<library-property>
+		<name>org.zkoss.zul.Button.mold</name>
+		<value>trendy</value>
+	</library-property>
+	<!-- load on startup -->
+<!-- 	<listener> -->
+<!-- 		<listener-class>it.infocamere.spri.web.utils.LoadOnApplicationStartup -->
+<!-- 		</listener-class> -->
+<!-- 	</listener> -->
+</zk>

@@ -1,0 +1,28 @@
+<!-- A causa di un bug nella versione 8,0.1.1 non si possono effettuare bind dei custom attribute con @load -->
+<!-- Quindi le stringhe del custom attribute bookmark vanno date a mano uguali a quelle presenti nella classe Bookmarks -->
+<panel>
+	<panelchildren
+		apply="it.infocamere.navbar.NavbarController,org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('it.infocamere.navbar.NavbarModel')">
+
+
+		<menubar>
+			<menu label="File">
+				<menupopup>
+					<menuitem label="Book1">
+						<custom-attributes bookmark="bookmark_1">
+						</custom-attributes>
+					</menuitem>
+
+					<menuseparator />
+					<menuitem label="Exit">
+						<custom-attributes bookmark="bookmark_2">
+						</custom-attributes>
+					</menuitem>
+				</menupopup>
+			</menu>
+			<menuitem label="Home" />
+		</menubar>
+
+	</panelchildren>
+</panel>

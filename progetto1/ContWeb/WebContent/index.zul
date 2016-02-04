@@ -1,6 +1,18 @@
-<window title="Exemple" apply="it.infocamere.mainwindow.MainWindowController">
-	<panel id="panel">
+<?meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=no"?>
+<window apply="it.infocamere.mainwindow.MainWindowController"
+	use="it.infocamere.mainwindow.MainWindow" vflex="true" hflex="true"
+	onBookmarkChange="it.infocamere.navbar.BookmarksManager.onBookmarkChange(event.bookmark);">
+	<!-- Il css di bootstrap è inserito in zk.xml -->
+	<?script type="text/javascript" src="bootstrap/js/bootstrap.min.js"?>
 
-	</panel>
+	<borderlayout hflex="true" vflex="true">
+		<north>
+			
+				<include src="/WEB-INF/pages/navbar/navbar_1.zul"></include>
+			
+		</north>
+
+	</borderlayout>
+
 
 </window>

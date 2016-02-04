@@ -3,32 +3,40 @@ package it.infocamere.mainwindow;
 //import it.infocamere.testejb.SimpleFacade;
 
 
+import it.infocamere.desktop.DesktopUtils;
+
 import org.apache.log4j.Logger;
-import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Window;
 
-public class MainWindowController extends SelectorComposer<Window> {
+public class MainWindowController extends SelectorComposer<MainWindow> {
 	Logger logger = Logger.getLogger(this.getClass());
 	@Wire
 	Panel panel;
-
-	public void doAfterCompose(Window w) {
+	MainWindow window;
+	public void doAfterCompose(MainWindow window) {
 		try {
-			super.doAfterCompose(w);
+			this.window = window;
+			logger.info("Start controller");
+			super.doAfterCompose(window);
+			DesktopUtils.storeMainWindowInDesktop(window);
+			DesktopUtils.storeMainWindowControllerInDesktop(this);
 			
-			while (panel.getFirstChild() != null) {
-				panel.removeChild(panel.getFirstChild());
-			}
-
-			Executions
-					.createComponents("/WEB-INF/pages/panel.zul", panel, null);
-
+			
+		
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
 	}
+	
+	
+	
+	
+	
 
+	
 }

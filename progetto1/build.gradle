@@ -70,8 +70,7 @@ task startJboss(type:Exec) {
     return standardOutput.toString()
   }
 }
-		
-   
+
    
 }
 
@@ -155,9 +154,6 @@ project(':ContEar'){
 			    
 	    //carico i jar che vanno inseriti nell'ear
 		earlib fileTree(dir: "${project.rootDir}/extEarLib", includes: ['**/*.jar'])
-		
-		
-		
 		
 		
 		//inserire qui i progetti contenuti	nell'ear
@@ -418,11 +414,7 @@ project(':ContEjb'){
 			providedCompile project(path:it) 
 		}
 		
-
 	}
-	
-	
-	
 }
 
 
