@@ -4,6 +4,7 @@ package it.infocamere.mainwindow;
 
 
 import it.infocamere.desktop.DesktopUtils;
+import it.infocamere.navbar.BookmarksManager;
 
 import org.apache.log4j.Logger;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -26,7 +27,7 @@ public class MainWindowController extends SelectorComposer<MainWindow> {
 			DesktopUtils.setMainWindowInDesktop(window);
 			DesktopUtils.setMainWindowControllerInDesktop(this);
 			DesktopUtils.setMainBorderLayout(mainBorderLayout);
-			
+			BookmarksManager.setNavbar("/WEB-INF/pages/navbar/navbar_1.zul");
 			
 		
 		} catch (Exception exc) {

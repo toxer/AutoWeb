@@ -4,6 +4,7 @@ import it.infocamere.desktop.DesktopUtils;
 
 import org.apache.log4j.Logger;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
@@ -50,6 +51,11 @@ public class BookmarksManager {
 											bookmarckEnum);
 								} else if (Messagebox.ON_CANCEL.equals(e
 										.getName())) {
+									// ripristino l'ultima navigazione
+									DesktopUtils.getDesktop().setBookmark(
+											(String) DesktopUtils.getDesktop()
+													.getAttribute(
+															"lastBookmark"));
 
 								}
 							}
@@ -59,6 +65,7 @@ public class BookmarksManager {
 		} catch (java.lang.IllegalArgumentException iax) {
 			logger.error("ATTENZIONE, BOOKMARK " + bookmark
 					+ " non presente nell'enumeration Bookmarks");
+			DesktopUtils.disablePreventNavigation();
 			// iax.printStackTrace();
 			return;
 		}
@@ -66,6 +73,7 @@ public class BookmarksManager {
 
 	/**
 	 * Qui vanno effettivamente mappate le azioni per la navigazione
+	 * 
 	 * @param bookmark
 	 * @param bookmarckEnum
 	 */
@@ -76,6 +84,8 @@ public class BookmarksManager {
 		// controllo se posso effettuare la navigazione
 
 		DesktopUtils.getDesktop().setBookmark(bookmark);
+		// mi salvo il valore dell'ultima navigazione
+		DesktopUtils.getDesktop().setAttribute("lastBookmark", bookmark);
 		switch (bookmarckEnum) {
 		case bookmark_1:
 			logger.info("Navigazione a bookmark1");
@@ -93,7 +103,7 @@ public class BookmarksManager {
 	}
 
 	/**
-	 * Se il paramtero è vero, viene ripulito il pannello indicato
+	 * Se il parametro è vero, viene ripulito il pannello indicato
 	 * 
 	 * @param centerPanel
 	 * @param eastPanel
@@ -125,6 +135,44 @@ public class BookmarksManager {
 		if (northPanel) {
 			emptyComponent(north);
 		}
+	}
+
+	public static void setNavbar(String navbarZul) {
+		emptyComponent(DesktopUtils.getMainBorderLayout().getNorth());
+		DesktopUtils
+				.getMainBorderLayout()
+				.getNorth()
+				.appendChild(Executions.createComponents(navbarZul, null, null));
+	}
+
+	/**
+	 * Pulisce tutto eccetto la navbar
+	 */
+	public static void clearAll() {
+		clearPanels(true, true, true, true, false);
+	}
+
+	/**
+	 * I componenti da aggiungere al border layout da file zul.
+	 * 
+	 * @param components
+	 */
+
+	/**
+	 * Ordine dei componenti: 1)center 2)east 3)west 4)south 5)north
+	 * 
+	 * @param components
+	 */
+
+	public static void composeLayout(String... zuls) {
+		Component c[] = new Component[zuls.length];
+		int index = 0;
+		for (String zul : zuls) {
+			c[index] = Executions.createComponents(zul, null, null);
+			index++;
+		}
+		composeLayout(c);
+
 	}
 
 	/**
