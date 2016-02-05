@@ -5,12 +5,16 @@
 	<!-- Il css di bootstrap è inserito in zk.xml -->
 	<?script type="text/javascript" src="bootstrap/js/bootstrap.min.js"?>
 
-	<borderlayout hflex="true" vflex="true">
-		<north>
-			
-				<include src="/WEB-INF/pages/navbar/navbar_1.zul"></include>
-			
+	<borderlayout hflex="true" vflex="true" id="mainBorderLayout">
+		<north id="mainNorth">
+
+			<include src="/WEB-INF/pages/navbar/navbar_1.zul"></include>
+
 		</north>
+		<center ></center>
+		<west></west>
+		<east></east>
+		<south></south>
 
 	</borderlayout>
 

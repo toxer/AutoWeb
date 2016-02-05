@@ -37,9 +37,8 @@ public class NavbarController extends SelectorComposer<Panelchildren>{
 	@Listen("onClick=menuitem")
 	public void elementSelect(Event evt){
 		String bookmark = (String)evt.getTarget().getAttribute("bookmark");
-		if (bookmark!=null){
-				
-			Executions.getCurrent().getDesktop().setBookmark(bookmark);
+		if (bookmark!=null){			
+			
 			//notifico l'evento di cambio bookmark esplicitamente
 			BookmarkEvent bookEvent = new BookmarkEvent(Events.ON_BOOKMARK_CHANGE,bookmark);
 			Events.postEvent(bookEvent);
