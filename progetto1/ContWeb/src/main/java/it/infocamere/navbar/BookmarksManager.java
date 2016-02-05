@@ -17,6 +17,8 @@ import org.zkoss.zul.West;
  * Classe deputata alla gestione dei bookmarks e della navigazione. I metodi
  * statici permettono di comporre dinamicamente il layout
  * 
+ * Se è attivato il preventNavigation appare un messaggio di conferma
+ * 
  * @author marco
  *
  */
