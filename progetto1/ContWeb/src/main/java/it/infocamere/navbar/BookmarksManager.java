@@ -1,11 +1,14 @@
 package it.infocamere.navbar;
 
 import it.infocamere.desktop.DesktopUtils;
+import it.infocamere.exception.ExecutionException;
 
 import org.apache.log4j.Logger;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.East;
@@ -94,7 +97,9 @@ public class BookmarksManager {
 			DesktopUtils.enablePreventNavigation();
 			logger.info("Attivato prevent");
 			break;
-
+		case bookmark_3:
+			composeLayout("/WEB-INF/pages/test/busyTest.zul");
+			break;
 		default:
 
 			logger.error("Non trovata azione per il bookmark");

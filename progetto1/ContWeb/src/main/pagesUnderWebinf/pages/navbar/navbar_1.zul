@@ -9,14 +9,18 @@
 		<menubar>
 			<menu label="File">
 				<menupopup>
-					<menuitem label="Book1">
+					<menuitem label="One">
 						<custom-attributes bookmark="bookmark_1">
 						</custom-attributes>
 					</menuitem>
 
 					<menuseparator />
-					<menuitem label="Exit">
+					<menuitem label="Two">
 						<custom-attributes bookmark="bookmark_2">
+						</custom-attributes>
+					</menuitem>
+					<menuitem label="Three">
+						<custom-attributes bookmark="bookmark_3">
 						</custom-attributes>
 					</menuitem>
 				</menupopup>

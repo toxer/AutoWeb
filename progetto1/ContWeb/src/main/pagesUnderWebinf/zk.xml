@@ -42,16 +42,16 @@
 		<max-upload-size>50000</max-upload-size>
 	</system-config>
 	<!-- Language settings. -->
-<!-- 	<library-property> -->
-<!-- 		<name>org.zkoss.web.preferred.locale</name> -->
-<!-- 		<value>it</value> -->
-<!-- 	</library-property> -->
+	<library-property>
+		<name>org.zkoss.web.preferred.locale</name>
+		<value>it</value>
+	</library-property>
 	<!-- Turn on the following if you want to use the trendy mold as default 
 		for all buttons. -->
-	<library-property>
-		<name>org.zkoss.zul.Button.mold</name>
-		<value>trendy</value>
-	</library-property>
+<!-- 	<library-property> -->
+<!-- 		<name>org.zkoss.zul.Button.mold</name> -->
+<!-- 		<value>trendy</value> -->
+<!-- 	</library-property> -->
 	<!-- load on startup -->
 <!-- 	<listener> -->
 <!-- 		<listener-class>it.infocamere.spri.web.utils.LoadOnApplicationStartup -->

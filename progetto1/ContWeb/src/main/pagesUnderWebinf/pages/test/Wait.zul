@@ -1,0 +1,4 @@
+<window title="wait" closable="false" mode="modal" width="200px"
+	height="50px">
+	<label>Wait...</label>
+</window>

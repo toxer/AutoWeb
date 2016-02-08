@@ -4,6 +4,7 @@ package it.infocamere.mainwindow;
 
 
 import it.infocamere.desktop.DesktopUtils;
+import it.infocamere.exception.ExecutionException;
 import it.infocamere.navbar.BookmarksManager;
 
 import org.apache.log4j.Logger;
@@ -31,7 +32,7 @@ public class MainWindowController extends SelectorComposer<MainWindow> {
 			
 		
 		} catch (Exception exc) {
-			exc.printStackTrace();
+			throw new ExecutionException(exc);
 		}
 	}
 	

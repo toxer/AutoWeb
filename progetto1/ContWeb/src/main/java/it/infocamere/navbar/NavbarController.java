@@ -40,8 +40,9 @@ public class NavbarController extends SelectorComposer<Panelchildren>{
 		if (bookmark!=null){			
 			
 			//notifico l'evento di cambio bookmark esplicitamente
-			BookmarkEvent bookEvent = new BookmarkEvent(Events.ON_BOOKMARK_CHANGE,bookmark);
-			Events.postEvent(bookEvent);
+//			BookmarkEvent bookEvent = new BookmarkEvent(Events.ON_BOOKMARK_CHANGE,bookmark);
+//			Events.postEvent(bookEvent);
+			BookmarksManager.onBookmarkChange(bookmark);
 		}
 	}
 	

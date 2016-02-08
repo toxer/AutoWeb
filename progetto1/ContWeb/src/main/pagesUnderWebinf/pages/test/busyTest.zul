@@ -1,0 +1,9 @@
+<panel apply="it.infocamere.test.BusyTestController">
+	<panelchildren>
+		<button id="busy" label="Busy">
+			
+
+			
+		</button>
+	</panelchildren>
+</panel>

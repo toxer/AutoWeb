@@ -2,13 +2,14 @@
 <window apply="it.infocamere.mainwindow.MainWindowController"
 	use="it.infocamere.mainwindow.MainWindow" vflex="true" hflex="true"
 	onBookmarkChange="it.infocamere.navbar.BookmarksManager.onBookmarkChange(event.bookmark);">
+	
 	<!-- Il css di bootstrap è inserito in zk.xml -->
 	<?script type="text/javascript" src="bootstrap/js/bootstrap.min.js"?>
 
 	<borderlayout hflex="true" vflex="true" id="mainBorderLayout">
 		<north id="mainNorth">
 
-			<include src="/WEB-INF/pages/navbar/navbar_1.zul"></include>
+		
 
 		</north>
 		<center ></center>

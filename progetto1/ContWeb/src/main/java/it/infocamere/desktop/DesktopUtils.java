@@ -3,9 +3,12 @@ package it.infocamere.desktop;
 import it.infocamere.mainwindow.MainWindow;
 import it.infocamere.mainwindow.MainWindowController;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 
 public class DesktopUtils {
@@ -21,6 +24,7 @@ public class DesktopUtils {
 	}
 
 	public static MainWindow getMainWindowFromDesktop() {
+		logger.info(Executions.getCurrent().getDesktop());
 		return (MainWindow) Executions.getCurrent().getDesktop()
 				.getAttribute(DesktopAttributes.MAIN_WINDOW);
 	}
@@ -64,5 +68,6 @@ public class DesktopUtils {
 	public static boolean isNavigationPrevented(){
 		return getMainWindowFromDesktop().getAttribute("preventNav")!=null?(Boolean)getMainWindowFromDesktop().getAttribute("preventNav"):false;
 	}
+	
 	
 }
