@@ -1,2 +1,10 @@
 org.apache.httpcomponents:httpcore:4.4.4
 com.sun.net.httpserver:http:20070405
+#remoting ejb
+org.jboss:jboss-remote-naming:2.0.4.Final
+org.jboss.xnio:xnio-nio:3.3.4.Final
+org.jboss.remoting:jboss-remoting:4.0.19.Final
+org.jboss.marshalling:jboss-marshalling:1.4.10.Final
+org.jboss.marshalling:jboss-marshalling-river:1.4.10.Final
+
+

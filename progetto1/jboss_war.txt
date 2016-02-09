@@ -1,1 +1,4 @@
 org.jboss.spec:jboss-javaee-6.0:3.0.3.Final
+#remoting ejb
+#org.jboss:jboss-ejb-client:2.1.4.Final
+#org.jboss:jboss-transaction-spi:7.3.1.Final

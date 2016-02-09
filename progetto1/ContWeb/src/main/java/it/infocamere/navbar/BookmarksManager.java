@@ -92,6 +92,7 @@ public class BookmarksManager {
 		switch (bookmarckEnum) {
 		case bookmark_1:
 			logger.info("Navigazione a bookmark1");
+			composeLayout("/WEB-INF/pages/test/ejbTest.zul");
 			break;
 		case bookmark_2:
 			DesktopUtils.enablePreventNavigation();
